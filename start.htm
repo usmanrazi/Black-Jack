@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Blackjack </title>
+    <link href="css/layout.css" rel="stylesheet" type="text/css" />
+    <link href="css/game.css" rel="stylesheet" type="text/css" />
+    <script src="js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" >
+	var userCardsCounter = 0 ;
+	var dealerCardsCounter = 0 ;
+	var initialLeft = 34.9668;
+	var incrementLeft = 81.3992;
+	function getImagePostions(y , x)
+	{
+		var position= (parseInt(x)*-73)-1;
+		position +='px ';
+		if(y == 0)
+		{
+			position += '-1px';
+		}
+		else{
+			var decrement = parseInt(y)-1;
+			if(decrement < 0 ){
+				decrement = 0 ;
+			}
+			position += (parseInt(y)*-99)+decrement;
+			position += 'px';
+		}
+		return position;
+	}
+	$(function(){
+			$.ajax({
+			   type: 'POST',
+			   url: 'BlackJack.php',
+			   data: {
+				action: 'gamestates',
+			   },
+			   beforeSend:function(){        
+			   },
+			   complete: function (o, s) {
+			   },
+			   success:function(data){
+				   console.log(data);
+				   var inital_position = data.split('<br>');
+					var t_wins = inital_position[0];
+					var t_lose = inital_position[1];
+					var t_drws = inital_position[2];
+					var total = parseInt(t_wins) + parseInt(t_lose) + parseInt(t_drws) ;
+					console.log(total);
+					if(total != 0)
+					{
+						$('#matches_wins').html(t_wins+ '('+Math.floor(parseFloat(t_wins/total)*100) +' %)' );
+						$('#matches_drws').html(t_drws+ '('+Math.floor(parseFloat(t_drws/total)*100) +' %)' );
+						$('#matches_loses').html(t_lose+ '('+Math.floor(parseFloat(t_lose/total)*100) +' %)' );
+					}
+			   },
+			   error:function(){
+				// failed request; give feedback to user
+				//$.notify("Technical Error occured. Please try again later.", "error");
+				
+			   }
+			});
+		$('#playGame_btn').click(function(){
+			$.ajax({
+			   type: 'POST',
+			   url: 'BlackJack.php',
+			   data: {
+				action: 'start',
+			   },
+			   beforeSend:function(){        
+			   },
+			   complete: function (o, s) {
+				
+			   },
+			   success:function(data){
+				//alert(data);
+				console.log(data);
+				$('#start_up_message').hide();
+				var inital_position = data.split('<br>');
+				var deal_card = inital_position[0];
+				var positions = deal_card.split('-');
+				$('#deals_first').css('background-position',getImagePostions(positions[0],positions[1]));
+				deal_card = inital_position[2];
+				positions = deal_card.split('-');
+				var newCard =  '<div style="background-position: '+getImagePostions(positions[0],positions[1])+'; top: 34px; left: '+parseFloat(parseFloat(initialLeft)+(parseFloat(incrementLeft)*parseInt(userCardsCounter)))+'px;" class="card"></div>';
+				$('#playerContainer').append(newCard);
+				userCardsCounter++;
+				deal_card = inital_position[3];
+				positions = deal_card.split('-');
+				newCard =  '<div style="background-position: '+getImagePostions(positions[0],positions[1])+'; top: 34px; left: '+parseFloat(parseFloat(initialLeft)+(parseFloat(incrementLeft)*parseInt(userCardsCounter)))+'px;" class="card"></div>';
+				$('#playerContainer').append(newCard);
+				userCardsCounter++;
+				var check_more_cards = 4 ;
+				while(inital_position[check_more_cards].indexOf('-') != -1)
+				{
+					deal_card = inital_position[check_more_cards];
+					positions = deal_card.split('-');
+					newCard =  '<div style="background-position: '+getImagePostions(positions[0],positions[1])+'; top: 34px; left: '+parseFloat(parseFloat(initialLeft)+(parseFloat(incrementLeft)*parseInt(userCardsCounter)))+'px;" class="card"></div>';
+					$('#playerContainer').append(newCard);
+					userCardsCounter++;
+					check_more_cards ++;
+				}
+				$('#userScore').html(inital_position[check_more_cards]);
+				var t_wins = inital_position[check_more_cards+1];
+				var t_lose = inital_position[check_more_cards+2];
+				var t_drws = inital_position[check_more_cards+3];
+				var total = parseInt(t_wins) + parseInt(t_lose) + parseInt(t_drws) ;
+				console.log(total);
+				if(total != 0)
+				{
+					$('#matches_wins').html(t_wins+ '('+Math.floor(parseFloat(t_wins/total)*100) +' %)' );
+					$('#matches_drws').html(t_drws+ '('+Math.floor(parseFloat(t_drws/total)*100) +' %)' );
+					$('#matches_loses').html(t_lose+ '('+Math.floor(parseFloat(t_lose/total)*100) +' %)' );
+				}
+			   },
+			   error:function(){
+				// failed request; give feedback to user
+				//$.notify("Technical Error occured. Please try again later.", "error");
+				
+			   }
+			});
+		});
+		$('#twist_buton').click(function(){
+			$.ajax({
+			   type: 'POST',
+			   url: 'BlackJack.php',
+			   data: {
+				action: 'twist',
+			   },
+			   beforeSend:function(){        
+			   },
+			   complete: function (o, s) {
+				
+			   },
+			   success:function(data){
+			   		console.log(data);
+					var inital_position = data.split('<br>');
+					var deal_card = inital_position[0];
+					var positions = deal_card.split('-');
+					var newCard =  '<div style="background-position: '+getImagePostions(positions[0],positions[1])+'; top: 34px; left: '+parseFloat(parseFloat(initialLeft)+(parseFloat(incrementLeft)*parseInt(userCardsCounter)))+'px;" class="card"></div>';
+					$('#playerContainer').append(newCard);
+					userCardsCounter++;
+					$('#userScore').html(inital_position[1]);
+					if(inital_position[1] > 21){
+						$('.twistbutton').hide();
+						deal_card = inital_position[2];
+						positions = deal_card.split('-');
+						$('#blankClassHolder').removeClass('blank');
+						$('#blankClassHolder').css('background-position',getImagePostions(positions[0],positions[1]));
+						$('#player_points').html($('#userScore').html());
+						$('#dealerScore').html(inital_position[3]);
+						$('#dealer_points').html(inital_position[3]);
+						$('#result_').html(inital_position[4]);
+						$('#result_score').show();
+						$('#twist_buton').hide();
+						$('#stick_buton').hide();
+					}
+					else if(inital_position[1] == 21){
+						$('#stick_buton').click();
+					}
+			   },
+			   error:function(){
+				// failed request; give feedback to user
+				//$.notify("Technical Error occured. Please try again later.", "error");
+				
+			   }
+			});
+		});
+		$('#stick_buton').click(function(){
+			$.ajax({
+			   type: 'POST',
+			   url: 'BlackJack.php',
+			   data: {
+				action: 'stick',
+			   },
+			   beforeSend:function(){        
+			   },
+			   complete: function (o, s) {
+				
+			   },
+			   success:function(data){
+			   		console.log(data);
+					var inital_position = data.split('<br>');
+					var state = inital_position[0];
+					if(state == 'winigState'){
+						var deal_card = inital_position[1];
+						var positions = deal_card.split('-');
+						$('#blankClassHolder').removeClass('blank');
+						$('#blankClassHolder').css('background-position',getImagePostions(positions[0],positions[1]));
+						$('#dealerScore').html(inital_position[2]);
+						$('#player_points').html($('#userScore').html());
+						$('#dealer_points').html(inital_position[2]);
+						$('#result_').html('You Lose!');
+						$('#result_score').show();
+						$('#twist_buton').hide();
+						$('#stick_buton').hide();
+					}
+					else{
+						var i =2 ;
+						var deal_card = inital_position[1];
+						var positions = deal_card.split('-');
+						$('#blankClassHolder').removeClass('blank');
+						$('#blankClassHolder').css('background-position',getImagePostions(positions[0],positions[1]));
+						dealerCardsCounter = 2 ;
+						while(inital_position[i] == 'again'){
+							deal_card = inital_position[i+1];
+							positions = deal_card.split('-');
+							var newCard =  '<div style="background-position: '+getImagePostions(positions[0],positions[1])+'; top: 34px; left: '+parseFloat(parseFloat(initialLeft)+(parseFloat(incrementLeft)*parseInt(dealerCardsCounter)))+'px;" class="card"></div>';
+							$('#dealerContainer').append(newCard);
+							dealerCardsCounter ++;
+							i++;
+							i++;
+						}
+						$('#dealerScore').html(inital_position[i]);
+						$('#player_points').html($('#userScore').html());
+						$('#dealer_points').html(inital_position[i]);
+						$('#result_').html(inital_position[i+1]);
+						$('#result_score').show();
+						$('#twist_buton').hide();
+						$('#stick_buton').hide();
+					}
+			   },
+			   error:function(){
+				// failed request; give feedback to user
+				//$.notify("Technical Error occured. Please try again later.", "error");
+				
+			   }
+			});
+		});
+		$('#reset_this_game').click(function(){
+			$.ajax({
+			   type: 'POST',
+			   url: 'BlackJack.php',
+			   data: {
+				action: 'reset',
+			   },
+			   beforeSend:function(){        
+			   },
+			   complete: function (o, s) {
+			   },
+			   success:function(data){
+			   },
+			   error:function(){
+				// failed request; give feedback to user
+				//$.notify("Technical Error occured. Please try again later.", "error");
+				
+			   }
+			});
+			   
+		});
+		$('.show_score').click(function(){
+			$.ajax({
+			   type: 'POST',
+			   url: 'BlackJack.php',
+			   data: {
+				action: 'getScore',
+			   },
+			   beforeSend:function(){        
+			   },
+			   complete: function (o, s) {
+			   },
+			   success:function(data){
+				   console.log(data);
+				   var gamesData = data.split('<br>');
+				   var histoy = ' <tr class="header"><td>Game </td> <td> Player</td><td> Dealer</td><td>Result </td></tr>';
+				   for(var i = 0 ; i < (gamesData.length -1 ) ; i++  )
+				   {
+					   var gamehis = gamesData[i].split('-');
+					   histoy += '<tr><td>'+gamehis[0]+'</td><td>'+gamehis[1]+'</td><td>'+gamehis[2]+'</td><td>'+gamehis[3]+'</td> </tr>'
+				   }
+				   $('#scoreHistroyGame').html(histoy);
+				   $('#result_score').show();
+			   },
+			   error:function(){
+				// failed request; give feedback to user
+				//$.notify("Technical Error occured. Please try again later.", "error");
+				
+			   }
+			});
+		});
+		
+	});
+	jQuery(document).keydown(function (event) {
+		if (event.keyCode == 27) {
+			event.preventDefault();
+			closeVideoPopup();
+		}
+	});
+	function closeVideoPopup() {
+		location.reload();
+	}
+	</script>
+</head>
+<body>
+ <form action="" />
+    <div class="page">
+        <div class="header">
+            <div id="stats">
+                <p>
+                    <label>
+                        Wins</label><span id="matches_wins">0 (0%)</span></p>
+                <p>
+                    <label>
+                        Draws</label><span id="matches_drws">0 (0%)</span></p>
+                <p>
+                    <label>
+                        Looses</label><span id="matches_loses">0 (0%)</span></p>
+                <a class="show_score">Show your scores...</a></div>
+        </div>
+        <div class="gametable" id="gametable">
+            <div id="dealerContainer" class="boardRow">
+                <div id="dealerScore" class="score">
+                    ?</div>
+                <div style="background-position: -658px -197px; top: 34px; left: 34.9668px;" class="card" id="deals_first">
+                </div>
+                <div id="blankClassHolder" style="top: 34px; left: 116.366px;" class="card blank">
+                </div>
+            </div>
+            <div id="playerContainer" class="boardRow">
+                <div id="userScore" class="score">
+                    20</div>
+               
+            </div>
+            <div title="Deal a new card" class="twistbutton button">
+                <input id="twist_buton" type="button" value="twist..." /></div>
+            <div title="Stay with your current cards" class="stickbutton button">
+                <input id="stick_buton" type="button" value="stick!" /></div>
+        </div>
+        <p class="copy">
+            © 2010 dotDigitalGroup.</p>
+    </div></div>
+    </form>
+    <div id="start_up_message">
+        <div class="messageBanner">
+            <div class="message">
+                Welcome to Blackjack.<small>Click 'Play' to start...</small></div>
+            <div class="playButton" id="playGame_btn">
+                <input type="image" src="images/play.png" class="playButton" />
+            </div>
+            <div class="bannerLinks">
+                <a class="show_score">Show your scores...</a><a id="reset_this_game">Reset this game!</a></div>
+        </div>
+        <div style="position: absolute; left: 0pt; top: 323px; background-color: Black;
+            z-index: 10; width: 1920px; height: 100px; display: block;">
+        </div>
+    </div>
+	<div id="result_score" style="display:none;">
+		<div class="scoreHistory">
+        <table>
+            <tbody id="scoreHistroyGame">
+                <tr class="header">
+                    <td>
+                        Game
+                    </td>
+                    <td>
+                        Player
+                    </td>
+                    <td>
+                        Dealer
+                    </td>
+                    <td>
+                        Result
+                    </td>
+                </tr>
+                <tr>
+                    <td id="game_no">
+                        1
+                    </td>
+                    <td id="player_points">
+                        18
+                    </td>
+                    <td id="dealer_points">
+                        17
+                    </td>
+                    <td id="result_">
+                        You win!
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div style="position: absolute; left: 0pt; top: 323px; background-color: Black; z-index: 10;
+        width: 1920px; height: 100px; display: block;">
+    </div>
+	</div>
+</body>
+</html>
